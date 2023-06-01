@@ -1,0 +1,61 @@
+<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Spirit Shell</title>
+    <link rel="icon" href="/spirit_shell/favicon-2ace31053b6573f2.ico">
+    <style type="text/css">html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+}</style>
+    <script>setTimeout(function () {
+    let canvas = document.getElementById("main");
+    canvas?.focus()
+}, 300);
+
+setTimeout(function () {
+    let canvas = document.getElementById("main");
+    canvas?.focus()
+
+    canvas.addEventListener('contextmenu', function(ev) {
+        ev.preventDefault();
+        return false
+    }, false);
+}, 1000);
+
+</script>
+
+<link rel="preload" href="/spirit_shell/spirit-shell-7ba4941c18005e35_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/spirit_shell/spirit-shell-7ba4941c18005e35.js"></head>
+
+<body>
+    <canvas id="main" tabindex="0"></canvas>
+
+
+<script type="module">import init from '/spirit_shell/spirit-shell-7ba4941c18005e35.js';init('/spirit_shell/spirit-shell-7ba4941c18005e35_bg.wasm');</script><script>(function () {
+    var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var url = protocol + '//' + window.location.host + '/_trunk/ws';
+    var poll_interval = 5000;
+    var reload_upon_connect = () => {
+        window.setTimeout(
+            () => {
+                // when we successfully reconnect, we'll force a
+                // reload (since we presumably lost connection to
+                // trunk due to it being killed, so it will have
+                // rebuilt on restart)
+                var ws = new WebSocket(url);
+                ws.onopen = () => window.location.reload();
+                ws.onclose = reload_upon_connect;
+            },
+            poll_interval);
+    };
+
+    var ws = new WebSocket(url);
+    ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.reload) {
+            window.location.reload();
+        }
+    };
+    ws.onclose = reload_upon_connect;
+})()
+</script></body></html>

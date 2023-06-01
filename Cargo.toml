@@ -1,9 +1,20 @@
 [package]
 name = "spirit-shell"
 version = "0.1.0"
+authors = ["Cat-Person"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.10.1"
+bevy = { version = "0.10.1", default-features = false, features = [
+    "bevy_winit",         # Window management
+    "bevy_render",        # Rendering framework core
+    "bevy_asset",         # Assets 0_o
+] }
+bevy_prototype_lyon = "0.8.0"
+rand = "0.8.5"
+
+[profile.release]
+opt-level = 's'
+lto = true
