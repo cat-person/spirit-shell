@@ -51,40 +51,40 @@ impl Default for Velocity2 {
     }
 }
 
-pub fn setup_grid(mut commands: Commands,
-    window_query: Query<&Window, With<PrimaryWindow>>){
-    let window: &Window = window_query.get_single().unwrap();
+// pub fn setup_grid(mut commands: Commands,
+//     window_query: Query<&Window, With<PrimaryWindow>>){
+//     let window: &Window = window_query.get_single().unwrap();
 
-    let vertical_sectors_count = 10.0;
+//     let vertical_sectors_count = 10.0;
 
-    let square_side = window.height() / vertical_sectors_count;
+//     let square_side = window.height() / vertical_sectors_count;
 
-    for vertical_line_idx in 0..(vertical_sectors_count as i32 - 1) {
-        commands.spawn(SpriteBundle {
-            sprite: Sprite {
-                color: Color::GRAY,
-                custom_size: Some(Vec2::new(window.width(), 4.0)),
-                ..default()
-            },
-            transform: Transform::from_translation(Vec3::new(0., (vertical_line_idx as f32 - (vertical_sectors_count / 2.0) + 1.0) * square_side, 0.)),
-            ..default()
-        });
-    }
+//     for vertical_line_idx in 0..(vertical_sectors_count as i32 - 1) {
+//         commands.spawn(SpriteBundle {
+//             sprite: Sprite {
+//                 color: Color::GRAY,
+//                 custom_size: Some(Vec2::new(window.width(), 4.0)),
+//                 ..default()
+//             },
+//             transform: Transform::from_translation(Vec3::new(0., (vertical_line_idx as f32 - (vertical_sectors_count / 2.0) + 1.0) * square_side, 0.)),
+//             ..default()
+//         });
+//     }
 
-    let horisontal_sectors_count = (window.width() / square_side).ceil();
+//     let horisontal_sectors_count = (window.width() / square_side).ceil();
 
-    for horisontal_line_idx in 0..(horisontal_sectors_count as i32 - 1) {
-        commands.spawn(SpriteBundle {
-            sprite: Sprite {
-                color: Color::DARK_GRAY,
-                custom_size: Some(Vec2::new(4.0, window.height())),
-                ..default()
-            },
-            transform: Transform::from_translation(Vec3::new((horisontal_line_idx as f32 - (horisontal_sectors_count / 2.0) + 1.0) * square_side, 0., 0.)),
-            ..default()
-        });
-    }
-}
+//     for horisontal_line_idx in 0..(horisontal_sectors_count as i32 - 1) {
+//         commands.spawn(SpriteBundle {
+//             sprite: Sprite {
+//                 color: Color::DARK_GRAY,
+//                 custom_size: Some(Vec2::new(4.0, window.height())),
+//                 ..default()
+//             },
+//             transform: Transform::from_translation(Vec3::new((horisontal_line_idx as f32 - (horisontal_sectors_count / 2.0) + 1.0) * square_side, 0., 0.)),
+//             ..default()
+//         });
+//     }
+// }
 
 pub fn setup_water_balls(mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
@@ -155,7 +155,7 @@ pub fn update_velocity(
                 let distance = self_position.translation.distance_squared(other_position.translation);
                 let acceleration = (self_position.translation - other_position.translation) / distance;
                 
-                let delta = time.delta_seconds() * 100.0;
+                let delta = time.delta_seconds() * 1000.0;
                 
                 self_velocity.x = self_velocity.x + delta * acceleration.x;
                 self_velocity.y = self_velocity.y + delta * acceleration.y;
@@ -167,7 +167,7 @@ pub fn update_velocity(
 
         let center_attraction = - self_position.translation / 20.0;
 
-        self_velocity.x += 10.0 * time.delta_seconds() * center_attraction.x;
-        self_velocity.y += 10.0 * time.delta_seconds() * center_attraction.y;
+        self_velocity.x += 20.0 * time.delta_seconds() * center_attraction.x;
+        self_velocity.y += 20.0 * time.delta_seconds() * center_attraction.y;
     }
 }
