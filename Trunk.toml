@@ -5,4 +5,4 @@ target = "index.html"
 release = true
 # The output dir for all final assets.
 dist = "docs"
-public_url = "/spirit_shell/"
+public_url = "/spirit-shell/"
