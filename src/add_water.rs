@@ -40,15 +40,15 @@ pub fn mouse_button_input(
     }
     if buttons.just_pressed(MouseButton::Right) {
         let coursor_position = window.cursor_position().unwrap() - coordinate_transform;
-        if let Some((entity, _, _)) = water_query.into_iter().find(|(_, _, transform)| {
+        water_query.into_iter().for_each(|(entity, _, transform)| {
             
             let delta_x = transform.translation.x - coursor_position.x;
             let delta_y = transform.translation.y - coursor_position.y;
 
-            delta_x * delta_x + delta_y * delta_y < 100.0
-        }) { 
-            commands.entity(entity).despawn()    
-        }
+            if delta_x * delta_x + delta_y * delta_y < 400.0 {
+                commands.entity(entity).despawn()    
+            }
+        })
     }
 
 }
