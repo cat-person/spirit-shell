@@ -1,7 +1,9 @@
 mod water_bundle;
 mod add_water;
+mod ship;
 
 use bevy::{prelude::*, window::PresentMode};
+use ship::*;
 use water_bundle::*;
 use add_water::*;
 
@@ -19,11 +21,12 @@ fn main() {
             ..default()
         }))
         .add_startup_system(setup_camera)
-        // .add_startup_system(setup_grid)
         .add_startup_system(setup_water_balls)
+        .add_startup_system(setup_ship)
         .add_system(water_movement)
         .add_system(update_velocity)
         .add_system(mouse_button_input)
+        .add_system(ship_look_at_mouse)
         .run();
 }
 

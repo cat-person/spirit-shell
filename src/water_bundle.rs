@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 use bevy::{prelude::*, sprite::Mesh2dHandle, window::PrimaryWindow};
 use rand::{distributions::Uniform, prelude::Distribution};
 
@@ -71,7 +69,7 @@ pub fn setup_water_balls(mut commands: Commands,
     let vx_distr = Uniform::new(-200.0, 200.0);
     let vy_distr = Uniform::new(-200.0, 200.0);
 
-    for _ in 0..10 {
+    for _ in 0..500 {
         commands.spawn(WaterBallBundle {
             mesh: meshes.add(shape::Circle::new(10.).into()).into(),
             material: materials.add(ColorMaterial::from(Color::PURPLE)),
@@ -82,14 +80,9 @@ pub fn setup_water_balls(mut commands: Commands,
     }
 }
 
-pub fn water_movement (window_query: Query<&Window, With<PrimaryWindow>>,
-    time: Res<Time>,
+pub fn water_movement (time: Res<Time>,
     mut water_query: Query<(Entity, &WaterBall, &mut Transform, &mut Velocity2)>,
 ) {
-    let window = window_query.get_single().unwrap();
-    let x_max = window.width() / 2.0 - 20.0;
-    let y_max = window.height() / 2.0 - 20.0;
-
     for (_, _, mut transform, mut velocity) in water_query.iter_mut() {
         transform.translation = Vec3{ 
             x: transform.translation.x + time.delta_seconds() * velocity.x, 
@@ -100,29 +93,53 @@ pub fn water_movement (window_query: Query<&Window, With<PrimaryWindow>>,
 }
 
 pub fn update_velocity(
+    window_query: Query<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
     water_query: Query<(Entity, &WaterBall, &Transform)>,
     mut velocity_query: Query<(Entity, &WaterBall, &Transform, &mut Velocity2)>
 ) {
+    let window = window_query.get_single().unwrap();
+    let x_max = window.width() / 2.0 - 20.0;
+    let y_max = window.height() / 2.0 - 20.0;
+
     for (self_entity, _, self_position, mut self_velocity) in velocity_query.iter_mut() {
         for (other_entity, _, other_position) in water_query.iter() {
             if self_entity != other_entity {
                 let distance = self_position.translation.distance_squared(other_position.translation);
                 let acceleration = (self_position.translation - other_position.translation) / distance;
                 
-                let delta = time.delta_seconds() * 10000.0;
-                
-                self_velocity.x = self_velocity.x + delta * acceleration.x;
-                self_velocity.y = self_velocity.y + delta * acceleration.y;
+                if(distance < 90000.0) {
+                    let delta = time.delta_seconds() * 1000.0;
+                    
+                    self_velocity.x = self_velocity.x + delta * acceleration.x;
+                    self_velocity.y = self_velocity.y + delta * acceleration.y;
+                }
             }
+        }
+
+        if self_position.translation.x < -x_max {
+            self_velocity.x += time.delta_seconds() * (-x_max - self_position.translation.x);
+        }
+
+        if x_max < self_position.translation.x {
+            self_velocity.x += time.delta_seconds() * (x_max - self_position.translation.x);
+        }
+
+        if self_position.translation.y < -y_max {
+            self_velocity.y += time.delta_seconds() * (-y_max - self_position.translation.y);
+        }
+
+        if y_max < self_position.translation.y {
+            self_velocity.y += time.delta_seconds() * (y_max - self_position.translation.y);
         }
 
         self_velocity.x *= 0.99;
         self_velocity.y *= 0.99;
 
-        let center_attraction = - self_position.translation / 20.0;
+        self_velocity.x = self_velocity.x.min(100.0);
+        self_velocity.x = self_velocity.x.max(-100.0);
 
-        self_velocity.x += 100.0 * time.delta_seconds() * center_attraction.x;
-        self_velocity.y += 100.0 * time.delta_seconds() * center_attraction.y;
+        self_velocity.y = self_velocity.y.min(100.0);
+        self_velocity.y = self_velocity.y.max(-100.0);
     }
 }
