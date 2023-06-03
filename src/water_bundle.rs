@@ -54,10 +54,6 @@ pub fn setup_water_balls(mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>) {
 
-    // let vertical_sectors_count = 10.0;
-
-    // let square_side = window.height() / vertical_sectors_count;
-
     let window = window_query.get_single().unwrap();
     let x_max = window.width() / 2.0 - 20.0;
     let y_max = window.height() / 2.0 - 20.0;
@@ -65,16 +61,12 @@ pub fn setup_water_balls(mut commands: Commands,
     let mut rng = rand::thread_rng();
     let x_distr = Uniform::new(-x_max, x_max);
     let y_distr = Uniform::new(-y_max, y_max);
-    
-    let vx_distr = Uniform::new(-200.0, 200.0);
-    let vy_distr = Uniform::new(-200.0, 200.0);
 
-    for _ in 0..500 {
+    for _ in 0..1000 {
         commands.spawn(WaterBallBundle {
             mesh: meshes.add(shape::Circle::new(10.).into()).into(),
             material: materials.add(ColorMaterial::from(Color::PURPLE)),
             transform: Transform::from_translation(Vec3::new(x_distr.sample(&mut rng), y_distr.sample(&mut rng), 0.)),
-            velocity: Velocity2 {x: vx_distr.sample(&mut rng), y: vy_distr.sample(&mut rng)},
             ..default()
         });
     }

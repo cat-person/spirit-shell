@@ -1,4 +1,6 @@
-use bevy::{input::mouse::MouseMotion, prelude::*, sprite::Mesh2dHandle, window::PrimaryWindow};
+use bevy::{input::mouse::MouseMotion, prelude::*, sprite::Mesh2dHandle, window::PrimaryWindow, render::camera};
+
+use crate::water_bundle::WaterBall;
 
 #[derive(Bundle)]
 pub struct ShipBundle {
@@ -66,40 +68,108 @@ pub fn setup_ship(
 }
 
 pub fn ship_look_at_mouse(
+    time: Res<Time>,
     window_query: Query<&Window, With<PrimaryWindow>>,
+    camera_query: Query<(&Camera, &GlobalTransform)>,
     mut ship_query: Query<(&Ship, &mut Transform)>,
-    mut motion_evr: EventReader<MouseMotion>,
+    buttons: Res<Input<MouseButton>>,
 ) {
-    if !motion_evr.is_empty() {
+
+    if buttons.pressed(MouseButton::Right) {
         if let Ok((_, mut transform)) = ship_query.get_single_mut() {
             if let Ok(window) = window_query.get_single() {
-                if let Some(coursor_position) = window.cursor_position() {
-                    let coursor_position_modified =
-                        coursor_position - Vec2::new(window.width() / 2.0, window.height() / 2.0);
-                    // transform.look_to(Vec3::new(coursor_position_modified.x, coursor_position_modified.y, 0.0), Vec3::Up);
+                    let (camera, camera_transform) = camera_query.single();
+                    if let Some(world_position) = window
+                        .cursor_position()
+                        .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+                        .map(|ray| ray.origin.truncate())
+                    {
+                        let direction_2d = Vec2::new(
+                            world_position.x - transform.translation.x,
+                            world_position.y - transform.translation.y,
+                        );
 
-                    let direction_2d = Vec2::new(
-                        coursor_position_modified.x - transform.translation.x,
-                        coursor_position_modified.y - transform.translation.y,
-                    );
-
-                    transform.rotation = if direction_2d.x.abs() < 0.00001 {
-                        if (direction_2d.y < 0.0) {
-                            Quat::from_xyzw(0.0, 0.0, 1.0, 0.0)
+                        transform.rotation = if direction_2d.x.abs() < 0.00001 {
+                            if (direction_2d.y < 0.0) {
+                                Quat::from_xyzw(0.0, 0.0, 1.0, 0.0)
+                            } else {
+                                Quat::from_xyzw(0.0, 0.0, 0.0, 1.0)
+                            }
                         } else {
-                            Quat::from_xyzw(0.0, 0.0, 0.0, 1.0)
-                        }
-                    } else {
-                        let normalised_direction_2d = direction_2d.normalize();
+                            let normalised_direction_2d = direction_2d.normalize();
 
-                        let zw = Vec2::new(
-                            1.0,
-                            normalised_direction_2d.x / (normalised_direction_2d.y + 1.0),
-                        ).normalize();
-                        Quat::from_xyzw(0.0, 0.0, zw.x, zw.y)
-                    };
-                }
+                            let zw = Vec2::new(
+                                1.0,
+                                normalised_direction_2d.x / (normalised_direction_2d.y - 1.0),
+                            )
+                            .normalize();
+
+                            
+                            transform.rotation.slerp(Quat::from_xyzw(0.0, 0.0, zw.x, zw.y), time.delta_seconds() * 5.0)
+                        };
+                    }
             }
         }
+    };
+}
+
+pub fn keyboard_controls_ship(
+    time: Res<Time>,
+    mut ship_query: Query<(&Ship, &mut Transform)>,
+    keyboard_input_query: Res<Input<KeyCode>>,
+) {
+    if let Ok((_, mut transform)) = ship_query.get_single_mut() {
+        let forward = transform.up();
+        let right = transform.right();
+        let left = transform.left();
+        
+        if keyboard_input_query.pressed(KeyCode::W) {
+            transform.translation += time.delta_seconds() * forward * 200.0; // * 20.0; // Vec3::new(0.0, 2.0, 0.0);
+        }
+
+        if keyboard_input_query.pressed(KeyCode::S) {
+            transform.translation += time.delta_seconds() * forward * -100.0; // Vec3::new(0.0, -2.0, 0.0);
+        }
+
+        if keyboard_input_query.pressed(KeyCode::A) {
+            transform.translation += time.delta_seconds() * left * 200.0; // Vec3::new(-1.0, 0.0, 0.0);
+        }
+
+        if keyboard_input_query.pressed(KeyCode::D) {
+            transform.translation += time.delta_seconds() * right * 200.0; // Vec3::new(1.0, 0.0, 0.0);
+        }
     }
+}
+
+pub fn camera_moving_after_ship(
+    time: Res<Time>,
+    mut camera_query: Query<(&Camera, &mut Transform), Without<Ship>>,
+    ship_query: Query<&Transform, With<Ship>>,
+) {
+    if let Ok((_, mut camera_transform)) = camera_query.get_single_mut() {
+        if let Ok(ship_transform) = ship_query.get_single() {
+            camera_transform.rotation = camera_transform.rotation.slerp(ship_transform.rotation, time.delta_seconds()); 
+            camera_transform.translation = camera_transform.translation 
+                + time.delta_seconds() * 5.0 * ((ship_transform.translation - ship_transform.down() * 150.0) - camera_transform.translation);
+        }
+    }
+}
+
+pub fn ship_repells_water_balls(
+    time: Res<Time>,
+    mut water_query: Query<(&WaterBall, &mut Transform)>,
+    ship_query: Query<&Transform, With<Ship>>,
+) {
+    for (_, transform) in water_query.iter_mut() {
+        if let Ok(ship_transform) = ship_query.get_single() {
+            
+        }
+    }
+    // if let Ok((_, mut camera_transform)) = camera_query.get_single_mut() {
+    //     if let Ok(ship_transform) = ship_query.get_single() {
+    //         camera_transform.rotation = camera_transform.rotation.slerp(ship_transform.rotation, time.delta_seconds()); 
+    //         camera_transform.translation = camera_transform.translation 
+    //             + time.delta_seconds() * 5.0 * ((ship_transform.translation - ship_transform.down() * 150.0) - camera_transform.translation);
+    //     }
+    // }
 }
