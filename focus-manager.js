@@ -9,7 +9,7 @@ setTimeout(function () {
 
     canvas.addEventListener('contextmenu', function(ev) {
         ev.preventDefault();
-        return false
+        return false;
     }, false);
 }, 1000);
 

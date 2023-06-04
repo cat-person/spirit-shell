@@ -25,7 +25,7 @@ fn main() {
         .add_startup_system(setup_ship)
         .add_system(water_movement)
         .add_system(update_velocity)
-        // .add_system(mouse_button_input)
+        .add_system(ship_repells_water_balls)
         .add_system(ship_look_at_mouse)
         .add_system(keyboard_controls_ship)
         .add_system(camera_moving_after_ship)
