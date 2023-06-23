@@ -100,7 +100,7 @@ pub fn update_velocity(
                 let distance = self_position.translation.distance_squared(other_position.translation);
                 let acceleration = (self_position.translation - other_position.translation) / distance;
                 
-                if(distance < 90000.0) {
+                if distance < 90000.0 {
                     let delta = time.delta_seconds() * 1000.0;
                     
                     self_velocity.x = self_velocity.x + delta * acceleration.x;

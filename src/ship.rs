@@ -116,7 +116,7 @@ pub fn keyboard_controls_ship(
         let left = transform.left();
 
         if keyboard_input_query.pressed(KeyCode::W) {
-            transform.translation += time.delta_seconds() * forward * 200.0; // * 20.0; // Vec3::new(0.0, 2.0, 0.0);
+            transform.translation += time.delta_seconds() * forward * 400.0; // * 20.0; // Vec3::new(0.0, 2.0, 0.0);
         }
 
         if keyboard_input_query.pressed(KeyCode::S) {
@@ -183,8 +183,8 @@ pub fn ship_repells_water_balls(
 
                         // println!("water_transform.translation = {} | ship_point = {} | distance = {}", water_transform.translation, ship_point, distance);
 
-                        if distance < 1600.0 {
-                            let acceleration = 100000.0 * (water_transform.translation - ship_point) / distance;
+                        if distance < 900.0 {
+                            let acceleration = 100.0 * (water_transform.translation - ship_point); /// distance;
                             let delta = time.delta_seconds();
 
                             // println!("applied_acceleration = {}", acceleration);
