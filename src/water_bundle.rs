@@ -125,8 +125,8 @@ pub fn update_velocity(
             self_velocity.y += time.delta_seconds() * (y_max - self_position.translation.y);
         }
 
-        self_velocity.x *= 0.99;
-        self_velocity.y *= 0.99;
+        self_velocity.x *= 0.999;
+        self_velocity.y *= 0.999;
 
         self_velocity.x = self_velocity.x.min(100.0);
         self_velocity.x = self_velocity.x.max(-100.0);
